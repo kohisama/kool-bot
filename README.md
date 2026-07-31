@@ -5,8 +5,10 @@ A Discord bot built with [discord.js](https://discord.js.org) v14 and **TypeScri
 ## Features
 
 - ⚡ Modern **ESM + TypeScript** setup (no bundler needed)
-- 🧩 Auto-loading slash commands and events (just drop a file in `src/commands` or `src/events`)
-- 🎛️ Slash command deployment script (guild-local for dev, global for production)
+- 🧩 **Auto-discovering** slash commands and message commands — drop a file, no registration needed
+- 📂 Recursive subdirectory support for organizing commands by category
+- 🔌 **Service layer** pattern (`src/lib/`) for API-backed commands
+- 🎛️ Slash command deployment script (guild-local for dev)
 - 🔒 Centralised config via `.env`
 
 ## Prerequisites
@@ -14,78 +16,70 @@ A Discord bot built with [discord.js](https://discord.js.org) v14 and **TypeScri
 - [Node.js](https://nodejs.org) 18.17.0 or newer
 - A Discord application + bot token from the [Developer Portal](https://discord.com/developers/applications)
 
-## Getting started
+## Quick Start
 
-1. **Install dependencies**
+```bash
+npm install
+cp .env.example .env   # then edit .env with your token, client ID, and guild ID
+npm run deploy:commands # register slash commands with Discord
+npm run dev             # start with hot-reload
+```
 
-   ```bash
-   npm install
-   ```
+Full setup guide: [Local Development](./docs/LOCAL_DEVELOPMENT.md)
 
-2. **Configure the bot**
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   Then fill in your values in `.env`:
-
-   | Variable        | Description                                                 |
-   | --------------- | ----------------------------------------------------------- |
-   | `DISCORD_TOKEN` | Your bot token (Developer Portal → Bot → Reset Token)       |
-   | `CLIENT_ID`     | Application ID (Developer Portal → General Information)     |
-   | `GUILD_ID`      | A server ID to deploy commands to instantly (dev, optional) |
-
-3. **Invite the bot** to your server with the `applications.commands` and `bot` scopes.
-
-4. **Deploy slash commands**
-
-   ```bash
-   npm run deploy:commands
-   ```
-
-5. **Run the bot**
-
-   ```bash
-   # Development (auto-reload on file changes)
-   npm run dev
-
-   # Production
-   npm run build && npm start
-   ```
-
-## Project structure
+## Project Structure
 
 ```text
 kool-bot/
 ├── src/
-│   ├── index.ts              # Entry point — creates the client, registers commands/events
-│   ├── config.ts             # Environment-based configuration
-│   ├── types.ts              # Shared Command / Event types + Client augmentation
-│   ├── deploy-commands.ts    # Standalone script to register slash commands with Discord
+│   ├── index.ts                # Entry point — creates client, loads events & commands
+│   ├── config.ts               # Environment-based configuration
+│   ├── constants.ts            # Command prefix, message command name enum
+│   ├── types.ts                # Shared types + Client.commands augmentation
+│   ├── deploy-commands.ts      # Standalone script to push slash commands to Discord
 │   ├── commands/
-│   │   └── ping.ts           # Example command (auto-loaded from this folder)
-│   ├── events/
-│   │   ├── ready.ts          # Fires once when the bot is online
-│   │   └── interactionCreate.ts  # Routes interactions to commands
+│   │   ├── slash/              # Slash commands (/name) — auto-loaded
+│   │   │   └── ping.ts
+│   │   └── message/            # Message commands (!name) — auto-loaded
+│   │       └── ping.ts
+│   ├── events/                 # Discord event handlers — auto-loaded
+│   │   ├── interactionCreate.ts
+│   │   └── messageCreate.ts
+│   ├── lib/                    # API clients, business logic (create as needed)
 │   └── utils/
-│       ├── registerCommands.ts   # loadCommands + deployCommands + registerCommands
-│       └── loadEvents.ts         # Auto-loads and binds event files
+│       ├── loadCommands.ts     # Dynamic command loader
+│       └── loadEvents.ts       # Dynamic event loader
+├── docs/
+│   ├── CONTRIBUTING.md         # How to add commands
+│   └── LOCAL_DEVELOPMENT.md    # Local testing setup
+├── .github/skills/             # Copilot agent skills
 ├── .env.example
-├── .gitignore
 ├── package.json
 └── tsconfig.json
 ```
 
-## Adding a command
+## Scripts
 
-Create a new file in `src/commands/`, e.g. `src/commands/echo.ts`:
+| Script | Description |
+|---|---|
+| `npm run dev` | Run with hot-reload (tsx watch) |
+| `npm run build` | Compile TypeScript to `dist/` |
+| `npm start` | Run the compiled bot |
+| `npm run deploy:commands` | Register slash commands with Discord |
+
+## Adding Commands
+
+Commands are **auto-discovered** — no barrel files or manual registration. Full guide: [CONTRIBUTING.md](./docs/CONTRIBUTING.md)
+
+### Slash command (`/name`)
+
+Drop a file in `src/commands/slash/`:
 
 ```ts
 import { SlashCommandBuilder } from 'discord.js';
-import type { Command } from '../types.js';
+import type { SlashCommand } from '@/types.js';
 
-export default {
+const echoCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('echo')
     .setDescription('Replies with your input.')
@@ -96,31 +90,65 @@ export default {
     const message = interaction.options.getString('message', true);
     await interaction.reply(message);
   },
-} satisfies Command;
+};
+
+export default echoCommand;
 ```
 
-Then restart the bot and re-run `npm run deploy:commands`.
+Then: `npm run deploy:commands` → restart.
 
-## Adding an event
+### Message command (`!name`)
 
-Create a new file in `src/events/`, e.g. `src/events/guildCreate.ts`:
+Add an entry to `MessageCommandName` in `src/constants.ts`, then drop a file in `src/commands/message/`:
 
 ```ts
-import type { Event } from '../types.js';
+import type { Message } from 'discord.js';
+import type { MessageCommand } from '@/types.js';
+import { MessageCommandName } from '@/constants.js';
+
+const echoCommand: MessageCommand = {
+  name: MessageCommandName.Echo,
+  description: 'Replies with your input.',
+  async execute(message: Message) {
+    await message.reply(message.content.slice(6)); // !echo <text>
+  },
+};
+
+export default echoCommand;
+```
+
+Restart — no deploy step needed.
+
+### API-backed commands
+
+Keep Discord glue in the command file. Put API logic in `src/lib/`:
+
+```
+src/lib/weather.ts          ← fetch, parse, error handling
+src/commands/slash/fun/weather.ts  ← Discord options, reply formatting
+```
+
+Full example with error handling and `deferReply`: [CONTRIBUTING.md](./docs/CONTRIBUTING.md#commands-that-call-external-apis)
+
+## Adding an Event
+
+Drop a file in `src/events/`:
+
+```ts
+import type { BotEvent } from '@/types.js';
 
 export default {
   name: 'guildCreate',
   execute(guild) {
-    console.log(`[bot] Joined guild: ${guild.name}`);
+    console.log(`Joined guild: ${guild.name}`);
   },
-} satisfies Event<'guildCreate'>;
+} as BotEvent<'guildCreate'>;
 ```
 
-## Scripts
+## Documentation
 
-| Script                    | Description                                  |
-| ------------------------- | -------------------------------------------- |
-| `npm run dev`             | Run with hot-reload (tsx watch)              |
-| `npm run build`           | Compile TypeScript to `dist/`                |
-| `npm start`               | Run the compiled bot                         |
-| `npm run deploy:commands` | Register slash commands with the Discord API |
+| Doc | Content |
+|---|---|
+| [CONTRIBUTING.md](./docs/CONTRIBUTING.md) | How to add slash, message, and API-backed commands |
+| [LOCAL_DEVELOPMENT.md](./docs/LOCAL_DEVELOPMENT.md) | Full local setup: Discord app, invite, env, testing |
+

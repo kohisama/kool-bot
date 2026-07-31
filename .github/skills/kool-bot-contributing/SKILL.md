@@ -5,7 +5,7 @@ description: 'kool-bot project conventions for adding Discord bot features (slas
 
 # kool-bot Contributing
 
-## When to Use test
+## When to Use
 
 Activate this skill whenever the user asks to add, modify, or refactor features in the **kool-bot** Discord bot project — especially commands, events, API integrations, or structural changes.
 
