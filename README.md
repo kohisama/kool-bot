@@ -60,11 +60,11 @@ kool-bot/
 
 ## Scripts
 
-| Script | Description |
-|---|---|
-| `npm run dev` | Run with hot-reload (tsx watch) |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm start` | Run the compiled bot |
+| Script                    | Description                          |
+| ------------------------- | ------------------------------------ |
+| `npm run dev`             | Run with hot-reload (tsx watch)      |
+| `npm run build`           | Compile TypeScript to `dist/`        |
+| `npm start`               | Run the compiled bot                 |
 | `npm run deploy:commands` | Register slash commands with Discord |
 
 ## Adding Commands
@@ -147,8 +147,7 @@ export default {
 
 ## Documentation
 
-| Doc | Content |
-|---|---|
-| [CONTRIBUTING.md](./docs/CONTRIBUTING.md) | How to add slash, message, and API-backed commands |
+| Doc                                                 | Content                                             |
+| --------------------------------------------------- | --------------------------------------------------- |
+| [CONTRIBUTING.md](./docs/CONTRIBUTING.md)           | How to add slash, message, and API-backed commands  |
 | [LOCAL_DEVELOPMENT.md](./docs/LOCAL_DEVELOPMENT.md) | Full local setup: Discord app, invite, env, testing |
-

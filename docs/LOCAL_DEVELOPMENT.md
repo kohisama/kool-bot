@@ -122,8 +122,8 @@ npm start       # runs compiled JS
 
 In your Discord test server:
 
-| Command | Expected Response |
-|---|---|
+| Command | Expected Response       |
+| ------- | ----------------------- |
 | `/ping` | `Pong! Latency is Xms.` |
 | `!ping` | `Pong! Latency is Xms.` |
 
@@ -152,15 +152,15 @@ If `/ping` doesn't appear in the slash command menu, re-run `npm run deploy:comm
 
 ## Troubleshooting
 
-| Symptom | Likely Cause | Fix |
-|---|---|---|
-| `Missing environment variables` | `.env` not created or missing values | Run `cp .env.example .env` and fill in all fields |
-| Bot online but not responding | Missing intents | Enable Message Content Intent in Developer Portal → Bot |
-| `/ping` doesn't appear | Slash commands not deployed | Run `npm run deploy:commands` |
-| `!ping` silently ignored | Bot lacks Message Content Intent | Enable it in the Portal, re-invite the bot if needed |
-| `Error [TOKEN_INVALID]` | Wrong or revoked token | Reset token in Developer Portal → Bot, update `.env` |
-| `Missing Access` on slash command | Bot not in server, or wrong guild ID | Verify `GUILD_ID` in `.env` matches your test server |
-| TypeScript compile errors | Syntax or type issues | Run `npm run build` to see errors, fix, then re-run |
+| Symptom                           | Likely Cause                         | Fix                                                     |
+| --------------------------------- | ------------------------------------ | ------------------------------------------------------- |
+| `Missing environment variables`   | `.env` not created or missing values | Run `cp .env.example .env` and fill in all fields       |
+| Bot online but not responding     | Missing intents                      | Enable Message Content Intent in Developer Portal → Bot |
+| `/ping` doesn't appear            | Slash commands not deployed          | Run `npm run deploy:commands`                           |
+| `!ping` silently ignored          | Bot lacks Message Content Intent     | Enable it in the Portal, re-invite the bot if needed    |
+| `Error [TOKEN_INVALID]`           | Wrong or revoked token               | Reset token in Developer Portal → Bot, update `.env`    |
+| `Missing Access` on slash command | Bot not in server, or wrong guild ID | Verify `GUILD_ID` in `.env` matches your test server    |
+| TypeScript compile errors         | Syntax or type issues                | Run `npm run build` to see errors, fix, then re-run     |
 
 ### Quick sanity checks
 
