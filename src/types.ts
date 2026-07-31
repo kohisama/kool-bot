@@ -11,9 +11,7 @@ import { MessageCommandName } from './constants.js';
 
 /** A single slash command: schema definition + execution handler. */
 export interface SlashCommand {
-  data:
-    | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>
-    | SlashCommandOptionsOnlyBuilder;
+  data: Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'> | SlashCommandOptionsOnlyBuilder;
   execute: (interaction: ChatInputCommandInteraction) => Promise<void> | void;
 }
 

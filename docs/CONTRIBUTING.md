@@ -54,10 +54,7 @@ const helloCommand: SlashCommand = {
     .setName('hello')
     .setDescription('Say hello to the bot!')
     .addUserOption((option) =>
-      option
-        .setName('target')
-        .setDescription('The user to greet')
-        .setRequired(false),
+      option.setName('target').setDescription('The user to greet').setRequired(false),
     ),
 
   async execute(interaction) {
@@ -90,7 +87,7 @@ Open `src/constants.ts` and add your command name:
 ```ts
 export enum MessageCommandName {
   Ping = 'ping',
-  Hello = 'hello',   // ← add this
+  Hello = 'hello', // ← add this
 }
 ```
 
@@ -173,10 +170,7 @@ export async function getWeather(city: string): Promise<WeatherResult> {
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new WeatherApiError(
-      `Weather API returned ${response.status}`,
-      response.status,
-    );
+    throw new WeatherApiError(`Weather API returned ${response.status}`, response.status);
   }
 
   const data = (await response.json()) as {
@@ -205,12 +199,7 @@ const weatherCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('weather')
     .setDescription('Get current weather for a city')
-    .addStringOption((option) =>
-      option
-        .setName('city')
-        .setDescription('City name')
-        .setRequired(true),
-    ),
+    .addStringOption((option) => option.setName('city').setDescription('City name').setRequired(true)),
 
   async execute(interaction) {
     const city = interaction.options.getString('city', true);
@@ -222,15 +211,13 @@ const weatherCommand: SlashCommand = {
       const weather = await getWeather(city);
       await interaction.editReply(
         `🌤 **${weather.location}**\n` +
-        `🌡 Temperature: ${weather.temperature}°C\n` +
-        `💧 Humidity: ${weather.humidity}%\n` +
-        `☁ Conditions: ${weather.condition}`,
+          `🌡 Temperature: ${weather.temperature}°C\n` +
+          `💧 Humidity: ${weather.humidity}%\n` +
+          `☁ Conditions: ${weather.condition}`,
       );
     } catch (error) {
       if (error instanceof WeatherApiError) {
-        await interaction.editReply(
-          `❌ Could not fetch weather: ${error.message}`,
-        );
+        await interaction.editReply(`❌ Could not fetch weather: ${error.message}`);
       } else {
         console.error('Unexpected error in weather command:', error);
         await interaction.editReply('❌ An unexpected error occurred.');

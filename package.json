@@ -9,14 +9,22 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "deploy:commands": "tsx src/deploy-commands.ts"
+    "deploy:commands": "tsx src/deploy-commands.ts",
+    "format": "prettier --write \"src/**/*.ts\" \"docs/**/*.md\" \"*.md\" \"*.json\" \"*.mjs\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"docs/**/*.md\" \"*.md\" \"*.json\" \"*.mjs\"",
+    "lint": "eslint eslint.config.mjs",
+    "lint:fix": "eslint --fix eslint.config.mjs"
   },
   "dependencies": {
     "discord.js": "^14.27.0",
     "dotenv": "^17.4.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^24.0.0",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2"
   }
